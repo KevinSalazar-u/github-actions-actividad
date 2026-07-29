@@ -1,0 +1,45 @@
+name: Crear documentación automáticamente
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v6
+
+      - name: Crear carpeta y archivo
+        shell: bash
+        run: |
+          dir="doc"
+
+          if [ ! -d "$dir" ]; then
+            echo "La carpeta doc no existe. Se procederá a crearla."
+            mkdir -p "$dir"
+            echo "# Hola Mundo" > "$dir/README.md"
+          else
+            echo "La carpeta doc ya existe."
+          fi
+
+      - name: Guardar cambios y subirlos a GitHub
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "No hay cambios para guardar."
+          else
+            git commit -m "Docs: agregar README al directorio doc"
+            git push
+          fi
